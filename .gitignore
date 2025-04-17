@@ -1,0 +1,45 @@
+# Fichiers de build
+bin/
+obj/
+
+# Fichiers de configuration utilisateur
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Dossier de cache de Visual Studio
+.vs/
+
+# Fichiers générés par Visual Studio Code
+.vscode/
+
+# Fichiers de logs
+*.log
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.bak
+
+# Fichiers de base de données locale
+*.mdf
+*.ldf
+
+# Fichiers de débogage
+*.pdb
+
+# Fichiers d'analyse et de test
+TestResults/
+*.coverage
+*.coveragexml
+
+# Fichiers de package
+packages/
+*.nupkg
+
+# Autres fichiers à ignorer
+FileContentIndex/
+
+#ignore app settings
+appsettings.json
