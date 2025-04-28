@@ -1,6 +1,7 @@
 ﻿using API_PAPYRUS.Models;
 using Microsoft.Data.SqlClient;
 using API_PAPYRUS.Data;
+using System.Data;
 
 namespace API_PAPYRUS.Repository
 {
@@ -13,62 +14,7 @@ namespace API_PAPYRUS.Repository
         public repProduit()
         {
         }
-        // --- Méthode DELETE : Supprimer un produit par son code ---
-        public void DeleteProduit(string codart)
-        {
-            // Ouverture d'une connexion SQL dans un bloc using pour garantir sa fermeture après usage.
-            using (SqlConnection connection = new Connection().GetConnection())
-            {
-                // Création d'une commande SQL pour la suppression avec la connexion ouverte.
-                using (SqlCommand requestDeleteProduit = connection.CreateCommand())
-                {
-                    // Définition de l'instruction SQL DELETE, qui supprimera le produit ayant le code passé en paramètre.
-                    requestDeleteProduit.CommandText = "DELETE FROM PRODUIT WHERE CODART = @codart";
-
-                    // Liaison du paramètre @codart à la valeur du code passée en argument.
-                    requestDeleteProduit.Parameters.AddWithValue("@codart", codart);
-
-                    // Exécution de la commande DELETE.
-                    requestDeleteProduit.ExecuteNonQuery();
-                }
-            }
-        }
-
-        // --- Méthode UPDATE : Modifier un produit existant ---
-        public void UpdateProduit(Produit produit)
-        {
-            // Ouverture d'une nouvelle connexion SQL dans un bloc using.
-            using (SqlConnection connection = new Connection().GetConnection())
-            {
-                // Création d'une commande SQL pour mettre à jour le produit dans la base.
-                using (SqlCommand requestUpdateProduit = connection.CreateCommand())
-                {
-                    // Définition de l'instruction SQL UPDATE.
-                    // Les colonnes LIBART, STKALE, STKPHY, QTEANN et UNIMES sont mises à jour
-                    // en fonction du produit identifié par son code (CODART).
-                    requestUpdateProduit.CommandText = @"UPDATE PRODUIT SET 
-                                                            LIBART = @libart,
-                                                            STKALE = @stkale,
-                                                            STKPHY = @stkphy,
-                                                            QTEANN = @qteann,
-                                                            UNIMES = @unimes
-                                                         WHERE CODART = @codart";
-
-                    // Liaison des paramètres pour mettre à jour chaque colonne avec les nouvelles valeurs.
-                    requestUpdateProduit.Parameters.AddWithValue("@libart", produit.Libart); // Nouveau libellé.
-                    requestUpdateProduit.Parameters.AddWithValue("@stkale", produit.Stkale); // Nouveau stock alloué.
-                    requestUpdateProduit.Parameters.AddWithValue("@stkphy", produit.Stkphy); // Nouveau stock physique.
-                    requestUpdateProduit.Parameters.AddWithValue("@qteann", produit.Qteann); // Nouvelle quantité annuelle.
-                    requestUpdateProduit.Parameters.AddWithValue("@unimes", produit.Unimes); // Nouvelle unité de mesure.
-                    requestUpdateProduit.Parameters.AddWithValue("@codart", produit.Codart); // Identifiant du produit à modifier.
-
-                    // Exécution de la commande UPDATE pour appliquer les changements dans la base.
-                    requestUpdateProduit.ExecuteNonQuery();
-                }
-            }
-        }
-
-
+       
         // --- Méthode READ : Récupérer tous les produits depuis la base ---
         public List<Produit> GetProduits()
         {
@@ -152,6 +98,61 @@ namespace API_PAPYRUS.Repository
                 }
             }
         }
+        // --- Méthode DELETE : Supprimer un produit en base, on fait bool pour savoir si la suppression a fonctionné, si le CODART n'existe pas, aucune ligne ne sera affectée ---
+        public bool SupprimerProduit(Produit produit)
+        {
+            // Le bloc "using" permet d'ouvrir une connexion SQL et garantit qu'elle sera automatiquement fermée et libérée à la fin du bloc, même en cas d'exception.
+            using (SqlConnection connection = new Connection().GetConnection())
+            {
+                using (SqlCommand requestDelProduit = connection.CreateCommand())
+                {
+                    requestDelProduit.CommandText = @"DELETE FROM PRODUIT WHERE CODART=@codart"; 
+                    requestDelProduit.Parameters.AddWithValue("@codart", produit.Codart);
 
+                    // Vérifie si la connexion est déjà ouverte
+                    if (connection.State != ConnectionState.Open)
+                    {
+                        connection.Open();
+                    }
+
+                    int rowsAffected = requestDelProduit.ExecuteNonQuery();
+
+                    return rowsAffected > 0;
+                }
+            }
+        }
+        // --- Méthode UPDATE : Modifier un produit existant ---
+        public void UpdateProduit(Produit produit)
+        {
+            // Ouverture d'une nouvelle connexion SQL dans un bloc using.
+            using (SqlConnection connection = new Connection().GetConnection())
+            {
+                // Création d'une commande SQL pour mettre à jour le produit dans la base.
+                using (SqlCommand requestUpdateProduit = connection.CreateCommand())
+                {
+                    // Définition de l'instruction SQL UPDATE.
+                    // Les colonnes LIBART, STKALE, STKPHY, QTEANN et UNIMES sont mises à jour
+                    // en fonction du produit identifié par son code (CODART).
+                    requestUpdateProduit.CommandText = @"UPDATE PRODUIT SET 
+                                                            LIBART = @libart,
+                                                            STKALE = @stkale,
+                                                            STKPHY = @stkphy,
+                                                            QTEANN = @qteann,
+                                                            UNIMES = @unimes
+                                                         WHERE CODART = @codart";
+
+                    // Liaison des paramètres pour mettre à jour chaque colonne avec les nouvelles valeurs.
+                    requestUpdateProduit.Parameters.AddWithValue("@libart", produit.Libart); // Nouveau libellé.
+                    requestUpdateProduit.Parameters.AddWithValue("@stkale", produit.Stkale); // Nouveau stock alloué.
+                    requestUpdateProduit.Parameters.AddWithValue("@stkphy", produit.Stkphy); // Nouveau stock physique.
+                    requestUpdateProduit.Parameters.AddWithValue("@qteann", produit.Qteann); // Nouvelle quantité annuelle.
+                    requestUpdateProduit.Parameters.AddWithValue("@unimes", produit.Unimes); // Nouvelle unité de mesure.
+                    requestUpdateProduit.Parameters.AddWithValue("@codart", produit.Codart); // Identifiant du produit à modifier.
+
+                    // Exécution de la commande UPDATE pour appliquer les changements dans la base.
+                    requestUpdateProduit.ExecuteNonQuery();
+                }
+            }
+        }
     }
 }

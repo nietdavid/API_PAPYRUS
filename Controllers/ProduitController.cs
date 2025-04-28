@@ -32,19 +32,38 @@ namespace API_PAPYRUS.Controllers
         [HttpPost]
         public JsonResult PostProduit([FromBody] Produit produit)
         {
-            if (produit == null)
+            try
             {
-                return new JsonResult("L'élément Produit est invalide.");
+                if (produit == null)
+                {
+                    return new JsonResult(new { message = "L'élément Produit est invalide." });
+                }
+
+                // Appelle la couche métier pour ajouter le produit à la BDD
+                bsProduit bs = new bsProduit();
+                bs.AjouterProduit(produit);
+
+                // Retourne l’objet ajouté pour vérification
+                return new JsonResult(produit);
             }
-
-            // Appelle la couche métier pour ajouter le produit à la BDD
-            bsProduit bs = new bsProduit();
-            bs.AjouterProduit(produit);
-
-            // Retourne l’objet ajouté pour vérification
-            return new JsonResult(produit);
+            catch (Exception ex)
+            {
+                // Capture toute exception (ex: validations, erreurs SQL) et retourne le message d'erreur
+                return new JsonResult(new { message = ex.Message });
+            }
         }
 
+        //DELETE /produit
+        [HttpDelete]
+        public IActionResult SupprimerProduit([FromBody] Produit produit)
+        {
+            bsProduit bs = new bsProduit();
+
+            if (bs.SupprimerProduit(produit))
+                return Ok(new { message = "Produit supprimé avec succès."});
+            else
+                return NotFound(new { message = "Produit non trouvé." });
+        }
 
     }
 }
